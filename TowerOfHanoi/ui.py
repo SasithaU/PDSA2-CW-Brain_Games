@@ -10,18 +10,21 @@ disk_colors = [
 ]
 peg_width = 20
 disk_height = 10
-base_width = 200
+base_width = 150  # Reduced base width for better separation
 base_height = 30
-offset_x = 150
-offset_y = 0
-peg_spacing = 150
+offset_x_start = 100  # Starting x-offset for the first peg
+offset_x =50
+offset_y = 10
+peg_spacing = 200  # Increased spacing between pegs
+canvas_width = 700  # Increased canvas width
+canvas_height = 400
 
 # Create Home Page 
 def home_page():
     home = tk.Tk()
-    home.title("Tower of Hanoi")
+    home.title("Play Tower of Hanoi")
     home.geometry("600x400")
-    home.configure(bg="#f0f8ff")
+    home.configure(bg="#A9A9A9")
 
     def start_game():
         home.destroy()  # Ends the mainloop, continuing to main()
@@ -30,14 +33,9 @@ def home_page():
         show_rules()  # Avoids scope conflict
 
     tk.Label(
-        home, text="Tower of Hanoi", font=("Helvetica", 28, "bold"),
-        fg="#333", bg="#f0f8ff"
+        home, text="Tower of Hanoi", font=("Algerian", 28, "bold"),
+        fg="#333", bg="#A9A9A9"
     ).pack(pady=40)
-
-    tk.Label(
-        home, text="Move all disks from Peg A to Peg C, carefully!",
-        font=("Helvetica", 14), bg="#f0f8ff", fg="#666"
-    ).pack(pady=10)
 
     tk.Button(
         home, text="Start Game", font=("Helvetica", 16), bg="#4caf50",
@@ -56,18 +54,72 @@ def home_page():
 def draw_peg(canvas, x, y, height):
     canvas.create_rectangle(x - peg_width // 2, y - height, x + peg_width // 2, y, fill=peg_color)
     canvas.create_rectangle(x - base_width // 2, y, x + base_width // 2, y + base_height, fill=peg_color)
-def draw_disk(canvas, peg_x, y, width, color):
-    canvas.create_rectangle(peg_x - width // 2, y, peg_x + width // 2, y + disk_height, fill=color, outline="black", width=1)
+
+def draw_disk(canvas, peg_x, y, width, color, tag):
+    disk_id = canvas.create_rectangle(
+        peg_x - width // 2, y,
+        peg_x + width // 2, y + disk_height,
+        fill=color, outline="black", width=1, tags=tag
+    )
+    return disk_id
+
 def draw_initial_state(canvas, num_of_disks):
     canvas.delete("all")
     y_start = 350 - base_height - disk_height // 2
+    canvas.disks = []  # Store disk IDs for drag logic
+    canvas.peg_locations = {
+        "A": offset_x_start,
+        "B": offset_x_start + peg_spacing,
+        "C": offset_x_start + 2 * peg_spacing
+    }
+    canvas.stacks = {"A": [], "B": [], "C": []} # Keep track of disks on each peg
+
+    # Draw pegs
+    draw_peg(canvas, canvas.peg_locations["A"], 350, 150 + base_height // 2)  # Peg A
+    draw_peg(canvas, canvas.peg_locations["B"], 350, 150 + base_height // 2)  # Peg B
+    draw_peg(canvas, canvas.peg_locations["C"], 350, 150 + base_height // 2)  # Peg C
+
     for i in range(num_of_disks):
-        width = 40 + (num_of_disks - 1 - i) * 20
+        width = 40 + (num_of_disks - 1 - i) * 15  # Slightly reduced disk width increment
         color = disk_colors[i % len(disk_colors)]
-        draw_disk(canvas, offset_x, y_start - i * disk_height, width, color)
-    draw_peg(canvas, offset_x, 350, 150 + base_height // 2)  # Peg A
-    draw_peg(canvas, offset_x + peg_spacing, 350, 150 + base_height // 2)  # Peg B
-    draw_peg(canvas, offset_x + 2 * peg_spacing, 350, 150 + base_height // 2)  # Peg C
+        tag = f"disk_{i}"
+        y = y_start - i * disk_height
+        disk_id = draw_disk(canvas, canvas.peg_locations["A"], y, width, color, tag)
+        canvas.disks.append(disk_id)
+        canvas.stacks["A"].append(disk_id)
+
+    # Add drag-and-drop
+    setup_drag_and_drop(canvas)
+
+    # Add drag-and-drop
+    setup_drag_and_drop(canvas)
+
+
+def setup_drag_and_drop(canvas):
+    canvas.drag_data = {"item": None, "x": 0, "y": 0}
+
+    def on_disk_press(event):
+        item = canvas.find_closest(event.x, event.y)[0]
+        if item in canvas.disks:
+            canvas.drag_data["item"] = item
+            canvas.drag_data["x"] = event.x
+            canvas.drag_data["y"] = event.y
+
+    def on_disk_motion(event):
+        item = canvas.drag_data["item"]
+        if item:
+            dx = event.x - canvas.drag_data["x"]
+            dy = event.y - canvas.drag_data["y"]
+            canvas.move(item, dx, dy)
+            canvas.drag_data["x"] = event.x
+            canvas.drag_data["y"] = event.y
+
+    def on_disk_release(event):
+        canvas.drag_data["item"] = None
+
+    canvas.bind("<ButtonPress-1>", on_disk_press)
+    canvas.bind("<B1-Motion>", on_disk_motion)
+    canvas.bind("<ButtonRelease-1>", on_disk_release)
 
 # Game Functions     
 def show_rules():
@@ -85,6 +137,11 @@ def get_user_input(num_of_disks):
     canvas = tk.Canvas(root, width=600, height=400, bg="white")
     canvas.pack(pady=10)
     draw_initial_state(canvas, num_of_disks)
+
+        # Draw labels A, B, C under each peg
+    canvas.create_text(offset_x, 370, text="A", font=("Helvetica", 14, "bold"))
+    canvas.create_text(offset_x + peg_spacing, 370, text="B", font=("Helvetica", 14, "bold"))
+    canvas.create_text(offset_x + 2 * peg_spacing, 370, text="C", font=("Helvetica", 14, "bold"))
 
     algorithm_var = tk.StringVar(root, "recursive")
     moves_entry_var = tk.StringVar(root)
@@ -155,3 +212,5 @@ if __name__ == '__main__':
     print(f"Entered Moves: {moves_str}")
     moves_list = parse_user_moves(moves_str)
     print(f"Parsed Moves: {moves_list}")
+
+

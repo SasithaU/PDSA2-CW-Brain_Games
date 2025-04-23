@@ -17,6 +17,6 @@ create table if not exists algorithm_times(
     timestamp timestamp default current_timestamp
 );
 
-select * from correct_responses
+select * from algorithm_times
  
 

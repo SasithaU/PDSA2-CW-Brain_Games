@@ -1,8 +1,5 @@
 import mysql.connector
 from tkinter import messagebox
-
-
-
 DB_CONFIG = {
     'host' : 'localhost',
     'user' : 'root',
