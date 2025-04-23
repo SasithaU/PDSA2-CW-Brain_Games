@@ -1,0 +1,131 @@
+ ## ♟️👑 8-Queens Puzzle 🧠 ##
+
+
+The 8-Queens Puzzle is a famous chessboard problem.
+Goal is to place 8 queens on a standard 8x8 chessboard such that no two queens threaten each other.
+A queen can attack another queen if they share the same row, column, or diagonal.
+
+
+🧩Rules:
+    You need to place 8 queens on an 8x8 grid (64 tile chessboard).
+    Queens can move across the board;
+        Horizontally ➡️
+        Vertically ⬇️
+        Diagonally 🔀 
+    The puzzle is solved when no two queens threaten each other — meaning, no two queens share the same row, column, or diagonal.
+
+🎯Ojective:
+    Find all possible solutions where 8 queens can be placed on the board without threatening each other.
+    The puzzle has 92 distinct solutions, but they can be mirrored or rotated to give the same layout in a different orientation.
+
+🎲Approach:
+
+1. Backtracking Algorithm:
+        The game uses a backtracking algorithm to try placing queens row by row, checking for conflicts with previously placed queens.
+        If a queen is placed successfully, the algorithm moves to the next row. If placing a queen results in a conflict, the algorithm backtracks to the previous row and tries a new position.
+
+2. Sequential vs Threaded Solutions:
+        Sequential: The algorithm runs in a single thread and processes one solution at a time.
+        Threaded: The algorithm uses multiple threads to speed up the process by solving different parts of the problem simultaneously.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+This project solves the classic **8-Queens Puzzle** using both **sequential** and **threaded** backtracking algorithms. 
+It stores solutions in a MySQL database and offers a GUI interface using `tkinter`. 
+The app also compares performance and allows players to submit their own solutions.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## ⚙️ Features
+
+- Solves the 8-Queens puzzle using:
+  - ✅ Sequential backtracking
+  - 🚀 Threaded backtracking
+- Stores all valid solutions in:
+  - `sequential_solutions` and `threaded_solutions` tables
+- Identifies and stores common solutions in `solutions` table
+- Allows users to:
+  - Enter their name and submit a custom queen placement
+  - Check for duplicates and validate solutions
+- Tracks performance (execution time) of both algorithms
+
+---
+
+## 🗄️ Database Setup
+
+Make sure your MySQL database has the following tables:
+
+```sql
+CREATE DATABASE eight_queens_game;
+
+CREATE TABLE sequential_solutions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    positions VARCHAR(255),
+    time_taken_ms FLOAT
+);
+
+CREATE TABLE threaded_solutions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    positions VARCHAR(255),
+    time_taken_ms FLOAT
+);
+
+CREATE TABLE timings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    algorithm_type VARCHAR(50),
+    time_taken_ms FLOAT
+);
+
+CREATE TABLE solutions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    positions VARCHAR(255),
+    is_found BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE players (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100),
+    positions VARCHAR(255),
+    solution_id INT
+);
+
+Update your db/connection.py with your database credentials:
+
+    host="your_host",
+    user="your_username",
+    password="your_password",
+    database="your_db_name"
+
+
+ ## 🖥️ How to Run
+
+1. Install dependencies:
+
+    pip install -r requirements.txt
+
+
+2. Run the solver:
+
+        To generate and save sequential results:
+        python utils/save_sequential.py
+
+        To generate and save threaded results:
+        python utils/save_threaded.py
+
+
+        To Launch the game:
+        python main.py
+
+
+ ## ✅ Testing
+
+ To Run unit tests:
+    python -m tests.unit_test
+
+
+
+ ## 📦 Requirements
+
+    Python 3.11+
+    MySQL server
+    mysql-connector-python
