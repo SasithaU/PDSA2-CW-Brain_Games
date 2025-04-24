@@ -18,6 +18,10 @@ def solve_n_queens_sequential():
                 if is_safe(board, row, col):
                     board[row] = col
                     backtrack(row + 1, board)
+        
+        except RecursionError as e:
+            print(f"Backtrack error - Max recursion depth exceeded: {e}")
+            
         except Exception as e:
             print(f"An error occurred while backtracking: {e}")
             raise
@@ -28,6 +32,3 @@ def solve_n_queens_sequential():
         print(f"An error occurred in the solve_n_queens_sequential function: {e}")
     return solutions
 
-# The solve_n_queens_sequential function uses a recursive backtracking approach where the program solves one part of the problem (one row) at a time.
-# There is no use of multiple threads or any parallel processing mechanisms like threading, multiprocessing, or asyncio.
-# The program waits for each recursive call to complete before continuing to the next, meaning tasks are executed in a specific order.

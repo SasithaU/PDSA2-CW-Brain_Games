@@ -15,7 +15,7 @@ class MainMenu:
             window_height = 670
 
             # Set up the background image
-            bg_image = Image.open("eightQueens\images\chessboard.jpg")  # Replace with your image path
+            bg_image = Image.open("eightQueens\images\chessboard.jpg")  
             bg_image = bg_image.resize((window_width, window_height), Image.Resampling.LANCZOS)
             self.bg_photo = ImageTk.PhotoImage(bg_image)
 

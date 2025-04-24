@@ -2,13 +2,13 @@
 from db.connection import get_connection
 from ui.message_ui import show_error
 
-def insert_player_solution(name, positions, solution_id):
+def insert_player_solution(name, positions, solution_id, time_taken):
     try:
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO players (name, positions, solution_id) VALUES (%s, %s, %s)",
-            (name, str(positions), solution_id)
+            "INSERT INTO players (name, positions, solution_id, time_taken_s) VALUES (%s, %s, %s, %s)",
+            (name, str(positions), solution_id, time_taken)
         )
         cursor.execute("UPDATE solutions SET is_found = TRUE WHERE id = %s", (solution_id,))
         conn.commit()

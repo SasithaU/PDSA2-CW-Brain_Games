@@ -26,6 +26,10 @@ def thread_solve(start_col):
     board[0] = start_col
     try:
         backtrack(1, board)
+    
+    except RecursionError as e:
+            print(f"RecursionError in backtracking thread {start_col}: {e}")
+            
     except Exception as e:
         print(f"Error occurred in backtracking thread for column {start_col}: {e}")
 
@@ -39,6 +43,11 @@ def solve_n_queens_threaded():
 
         for t in threads:
             t.join()
+
+    except MemoryError as e:
+        print(f"MemoryError in thread for column {start_col}: {e}")
+    except KeyboardInterrupt as e:
+        print(f"KeyboardInterrupt in thread for column {start_col}: {e}")        
     except Exception as e:
         print(f"An error occurred while managing threads: {e}")
     return solutions

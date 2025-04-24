@@ -1,0 +1,56 @@
+This game requires the following requirements;
+
+ ## 📦 Requirements
+
+    Python 3.11+
+    MySQL server
+    mysql-connector-python
+
+
+ ## create the following database;
+
+        CREATE TABLE `players` (
+        `id` int NOT NULL AUTO_INCREMENT,
+        `name` varchar(100) NOT NULL,
+        `positions` varchar(255) NOT NULL,
+        `solution_id` int DEFAULT NULL,
+        `submitted_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        `time_taken_s` float DEFAULT NULL,
+        PRIMARY KEY (`id`),
+        KEY `solution_id` (`solution_id`),
+        CONSTRAINT `players_ibfk_1` FOREIGN KEY (`solution_id`) REFERENCES `solutions` (`id`)
+        ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+        CREATE TABLE `sequential_solutions` (
+        `id` int NOT NULL AUTO_INCREMENT,
+        `positions` varchar(255) NOT NULL,
+        `time_taken_ms` double NOT NULL,
+        PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB AUTO_INCREMENT=93 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+        CREATE TABLE `threaded_solutions` (
+        `id` int NOT NULL AUTO_INCREMENT,
+        `positions` varchar(255) NOT NULL,
+        `time_taken_ms` double NOT NULL,
+        PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB AUTO_INCREMENT=93 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+        CREATE TABLE `solutions` (
+        `id` int NOT NULL AUTO_INCREMENT,
+        `positions` varchar(500) DEFAULT NULL,
+        `is_found` tinyint(1) DEFAULT '0',
+        PRIMARY KEY (`id`),
+        UNIQUE KEY `positions` (`positions`),
+        UNIQUE KEY `positions_2` (`positions`),
+        UNIQUE KEY `positions_3` (`positions`)
+        ) ENGINE=InnoDB AUTO_INCREMENT=829 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+        CREATE TABLE `timings` (
+        `id` int NOT NULL AUTO_INCREMENT,
+        `algorithm_type` enum('sequential','threaded') NOT NULL,
+        `time_taken_ms` double NOT NULL,
+        `recorded_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

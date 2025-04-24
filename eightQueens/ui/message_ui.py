@@ -10,7 +10,7 @@ class MessageWindow:
 
         # Calculate dynamic width based on message length
         message_length = len(message)
-        width = max(370, message_length * 10 + 50)  # Base width of 370, adjust dynamically
+        width = max(370, message_length * 10 + 50)  
         height = 150
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()

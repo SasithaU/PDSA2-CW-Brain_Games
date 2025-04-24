@@ -1,5 +1,7 @@
 # src/validation/validator.py
 
+import ast 
+import time
 from tkinter import messagebox
 from ui.message_ui import show_error, show_warning, show_success, show_info
 from src.solution_controller import get_all_solutions, insert_player_solution,reset_all_solution_flags
@@ -8,62 +10,72 @@ from src.solution_controller import get_all_solutions, insert_player_solution,re
 def is_valid_solution(solution):
     for i in range(len(solution)):
         for j in range(i + 1, len(solution)):
-            if abs(solution[i] - solution[j]) == abs(i - j):  # Check diagonals
+            if abs(solution[i] - solution[j]) == abs(i - j):  
                 return False
     return True
 
 # Solution Invalid ,already found, Correct 
-def validate_and_save(name, player_pos):
+def validate_and_save(name, player_pos, start_time):
+
     try:
-        if not check_all_solutions_found():  # Stops if all are already found
+        if not check_all_solutions_found():
             return
         try:
-                all_solutions = get_all_solutions()
+            all_solutions = get_all_solutions()
         except (ConnectionError, RuntimeError) as db_err:
-                show_error("Database Error", f"Could not fetch solutions: {db_err}")
-                return
+            show_error("Database Error", f"Could not fetch solutions: {db_err}")
+            return
 
         if not is_valid_solution(player_pos):
             show_error("Invalid Solution", "Incorrect! Queens are attacking each other. Try again!")
             return
         
         for sol_id, pos_str, is_found in all_solutions:
+            stored_pos = None
             try:
-                stored_pos = tuple(map(int, pos_str.strip("()").split(",")))
+                stored_pos_list = ast.literal_eval(pos_str)
+                stored_pos = [col for row, col in sorted(stored_pos_list, key=lambda x: x[0])]
+
+                if list(player_pos) == stored_pos:
+                    if is_found:
+                        show_warning("Already Found", "Solution Already Found! Try again!")
+                        return
+
+                    formatted_solution = [(i, col) for i, col in enumerate(player_pos)]
+                    end_time = time.time()
+                    time_taken = round(end_time - start_time, 2)
+
+                    try:
+                        insert_player_solution(name, formatted_solution, sol_id, time_taken)
+
+                    except (ConnectionError, RuntimeError) as insert_err:
+                        show_error("Save Error", f"Failed to save solution: {insert_err}")
+                        return
+
+                    remaining = [s for s in all_solutions if not s[2]]
+                    try:
+                        if len(remaining) == 1:
+                            win = show_success("Correct!", "You found the final solution! 🎉")
+                            win.wait_window()
+                            show_info("🎉 All Solutions Found", "All 92 solutions have now been found!")
+                            reset_all_solution_flags()
+                        else:
+                            show_success("Correct!", "You found a valid solution!")
+                    except Exception as e:
+                        show_error("Reset Error", f"Something went wrong while resetting: {e}")
+                    return
             except (ValueError, TypeError) as parse_err:
                 show_warning("Data Format Warning", f"Skipping a malformed solution entry: {parse_err}")
                 continue
-            if player_pos == stored_pos:
-                if is_found:
-                    show_warning("Already Found", "That solution has already been submitted!")
-                    return
-                try:
-                    insert_player_solution(name, player_pos, sol_id)
-                except (ConnectionError, RuntimeError) as insert_err:
-                    show_error("Save Error", f"Failed to save solution: {insert_err}")
-                    return
-
-                remaining = [s for s in all_solutions if not s[2]]
-                try:
-                    if len(remaining) == 1:  # Current one was the last missing
-                        win = show_success("Correct!", "You found the final solution! 🎉")
-                        win.wait_window() 
-                        show_info("🎉 All Solutions Found", "All 92 solutions have now been found!")
-                        reset_all_solution_flags()
-                    else:
-                        show_success("Correct!", "You found a valid solution!")
-                except Exception as e:
-                        show_error("Reset Error", f"Something went wrong while resetting: {e}")
-                return
         show_error("Wrong", "That's not a valid solution.")
     except Exception as e:
-        show_error("Unexpected Error", f"An unexpected error occurred: {e}")
+        show_error("Unexpected Error", f"Something went wrong: {e}")
 
-# Check if all solutions are found, reset the sound solutions
+# Check if all solutions are found, reset the found solutions
 def check_all_solutions_found():
     try:
         all_solutions = get_all_solutions()
-        remaining_solutions = [sol for sol in all_solutions if not sol[2]]  # If `is_found` is False
+        remaining_solutions = [sol for sol in all_solutions if not sol[2]]  
         if not remaining_solutions:
             show_info("🎉 All Solutions Found", "All solutions have already been found!")
             try:

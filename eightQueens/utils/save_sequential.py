@@ -8,31 +8,42 @@ def save_sequential_results():
     start = time.time()
     solutions = solve_n_queens_sequential()
     end = time.time()
-    total_duration_ms = (end - start) * 1000  # Total time taken for all solutions
+    total_duration_ms = (end - start) * 1000
 
     try:
         conn = get_connection()
         cursor = conn.cursor()
 
+        cursor.execute("TRUNCATE TABLE sequential_solutions")
+        conn.commit()
+
         new_count = 0
         for sol in solutions:
-            pos_str = ",".join(map(str, sol))  # Convert solution to a comma-separated string
+            pos_str = str([(row, col) for row, col in enumerate(sol)])
 
             cursor.execute(
                 "INSERT INTO sequential_solutions (positions, time_taken_ms) VALUES (%s, %s)",
-                (pos_str, total_duration_ms)  # Store total time for the process, or you can modify this based on your needs
+                (pos_str, total_duration_ms)
             )
             new_count += 1
 
-        # Insert overall timing for the sequential algorithm into the 'timings' table
+        # Insert timing for this run
         cursor.execute(
             "INSERT INTO timings (algorithm_type, time_taken_ms) VALUES (%s, %s)",
             ("sequential", total_duration_ms)
         )
 
         conn.commit()
-        print(f"✅ {new_count} sequential solutions inserted.")
-        print(f"🕒 Total Time for Sequential: {total_duration_ms:.2f} ms")
+        print(f"🕒 Total Time for Sequential: {new_count} in {total_duration_ms:.2f} ms")
+
+    except ModuleNotFoundError as e:
+        print("Sequential error - Module not found:", e)
+
+    except ConnectionError as e:
+        print("Sequential error - DB connection failed:", e)
+        
+    except RuntimeError as e:
+        print("Sequential error - Runtime issue:", e)
 
     except Exception as e:
         print("Sequential error:", e)
@@ -40,15 +51,8 @@ def save_sequential_results():
         if conn.is_connected():
             cursor.close()
             conn.close()
-    return total_duration_ms 
+    return total_duration_ms
 
 if __name__ == "__main__":
     save_sequential_results()
 
-
-
-# Solves the 8-Queens puzzle using a sequential backtracking algorithm.
-# Measures how long it takes to find all solutions.
-# Saves each solution (as a comma-separated string) into the sequential_solutions table in the database.
-# Also saves the total time taken into the timings table for performance tracking.
-# Prints how many solutions were inserted and how long the process took.

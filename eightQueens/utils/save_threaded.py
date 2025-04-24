@@ -8,15 +8,18 @@ def save_threaded_results():
     start = time.time()
     solutions = solve_n_queens_threaded()
     end = time.time()
-    total_duration_ms = (end - start) * 1000  # Total time for all solutions
+    total_duration_ms = (end - start) * 1000  
 
     try:
         conn = get_connection()
         cursor = conn.cursor()
 
+        cursor.execute("TRUNCATE TABLE threaded_solutions")
+        conn.commit()
+
         new_count = 0
         for sol in solutions:
-            pos_str = ",".join(map(str, sol))
+            pos_str = str([(row, col) for row, col in enumerate(sol)])
 
             cursor.execute(
                 "INSERT INTO threaded_solutions (positions, time_taken_ms) VALUES (%s, %s)",
@@ -31,11 +34,23 @@ def save_threaded_results():
         )
 
         conn.commit()
-        print(f"✅ {new_count} threaded solutions inserted.")
-        print(f"🕒 Total Time for Threaded: {total_duration_ms:.2f} ms")
+        print(f"🕒 Total Time for Threaded: {new_count} in {total_duration_ms:.2f} ms")
+    
+    except ModuleNotFoundError as e:
+        print("Threaded error - Module not found:", e)
+
+    except ConnectionError as e:
+        print("Threaded error - Could not connect to DB:", e)
+
+    except TypeError as e:
+        print("Threaded error - Type mismatch:", e)
+
+    except ValueError as e:
+        print("Threaded error - Value error:", e)
 
     except Exception as e:
         print("Threaded error:", e)
+        
     finally:
         if conn.is_connected():
             cursor.close()
