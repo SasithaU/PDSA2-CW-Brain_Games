@@ -6,7 +6,19 @@ class TSPGameUI:
         self.root = root
         self.app = app
         self.root.title("TSP Game")
-        self.root.geometry("800x600")
+
+        # Center and slightly move the TSP Game window upward
+        window_width = 600
+        window_height = 690
+
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+
+        x = (screen_width // 2) - (window_width // 2)
+        y = (screen_height // 2) - (window_height // 2) - 18  # Move up by 18px
+
+        self.root.geometry(f"{window_width}x{window_height}+{x}+{y}")
+
         self.root.resizable(True, True)
         self.frame = tk.Frame(root, bg="#C3B3E4") 
         label = tk.Label(self.frame, text="Welcome to TSP Game", bg=self.frame["bg"], font=("Helvetica", 18))
@@ -20,7 +32,8 @@ class TSPGameUI:
 
     def show_welcome_screen(self):
         self.clear()
-        tk.Label(self.frame, text="Traveling Salesman Problem!", font=("Helvetica", 24, "bold"),bg=self.frame["bg"]).pack(pady=30)
+        
+        tk.Label(self.frame, text="Travelling Salesman Game!", font=("Helvetica", 24, "bold"),bg=self.frame["bg"]).pack(pady=30)
         tk.Label(self.frame, text="Enter your name:", font=("Helvetica", 14),bg=self.frame["bg"]).pack(pady=10)
         name_entry = tk.Entry(self.frame, font=("Helvetica", 14),  bd=2, relief="groove", highlightthickness=1, highlightbackground="#ccc" )
         name_entry.pack(pady=10, ipady=1, ipadx=1)
@@ -91,27 +104,44 @@ class TSPGameUI:
 
     def show_distance_matrix(self, matrix, home, cities, callback):
         self.clear()
-        tk.Label(self.frame, text="🗺️ Distance Matrix", font=("Helvetica", 16),bg=self.frame["bg"]).pack(pady=10)
+        tk.Label(self.frame, text="🗺️ Distance Travelled", font=("Helvetica", 16),bg=self.frame["bg"]).pack(pady=10)
 
-        tree = ttk.Treeview(self.frame)
+        style = ttk.Style()
+        style.configure("Bold.Treeview.Heading", font=("Helvetica", 10, "bold"),foreground="#6A0DAD")
+        style.configure("Bold.Treeview", font=("Helvetica", 10), rowheight=25, borderwidth=1, relief="solid") 
+
+        style.layout("Bold.Treeview", [
+            ('Treeview.field', {'sticky': 'nswe', 'border': '1', 'children': [
+                ('Treeview.padding', {'sticky': 'nswe', 'children': [
+                    ('Treeview.treearea', {'sticky': 'nswe'})
+                ]})
+            ]})
+        ])
+
+        tree = ttk.Treeview(self.frame,style="Bold.Treeview")
         city_list = list(matrix.keys())
         tree["columns"] = city_list
         tree.column("#0", width=80, anchor="w")
-        tree.heading("#0", text="From/To")
+        tree.heading("#0", text="From/To", anchor="w")
 
         for city in city_list:
             tree.column(city, width=70, anchor="center")
-            tree.heading(city, text=city)
+            tree.heading(city, text=city, anchor="center")
 
         for city in city_list:
             values = [matrix[city][dest] for dest in city_list]
             tree.insert("", "end", text=city, values=values)
 
+        tree.tag_configure("purple_bold", foreground="#6A0DAD", font=("Helvetica", 10, "bold"))
+
+        for child in tree.get_children():
+            tree.item(child, tags=("purple_bold",))
+
         tree.pack(pady=10)
         self.show_route_input(matrix, home, cities, callback)
 
     def show_route_input(self, matrix, home, cities, callback):
-        tk.Label(self.frame, text=f"🔔 Your home city is: {home}", font=("Arial", 14), fg="blue",bg=self.frame["bg"]).pack(pady=10)
+        tk.Label(self.frame, text=f"🔔 Your home city is: {home}", font=("Arial", 14), fg="#322b59",bg=self.frame["bg"]).pack(pady=10)
         tk.Label(self.frame, text="Click on cities to select your travel path.", font=("Arial", 12),bg=self.frame["bg"]).pack()
 
         route = [home]
@@ -128,14 +158,14 @@ class TSPGameUI:
                 route.append(home)
             callback(route)
 
-        frame = tk.Frame(self.frame)
+        frame = tk.Frame(self.frame,bg=self.frame["bg"])
         frame.pack(pady=10)
 
         for city in cities:
-            btn = tk.Button(frame, text=city, width=10, command=lambda c=city: add_city(c))
+            btn = tk.Button(frame, text=city, width=10,bg="#f7b66a", command=lambda c=city: add_city(c))
             btn.pack(side=tk.LEFT, padx=10)
 
-        tk.Label(self.frame, textvariable=route_var, font=("Arial", 12), fg="green",bg=self.frame["bg"]).pack(pady=10)
+        tk.Label(self.frame, textvariable=route_var, font=("Arial", 12,"bold"), fg="#6A0DAD",bg=self.frame["bg"]).pack(pady=10)
         tk.Button(self.frame, text="✅ Submit Route", command=submit_route,font=("Helvetica", 13, "bold"),activebackground="#C3B3E4",padx=50,pady=5,
             bg="#6A5ACD",fg="white",).pack(pady=10)
 
