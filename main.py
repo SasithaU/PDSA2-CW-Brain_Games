@@ -39,7 +39,7 @@ class BrainGamesMenu:
         self.create_game_button(center_frame, "Tower of Hanoi", "TowerOfHanoi/main.py", "#b3d138")
         self.create_game_button(center_frame, "8 Queens", "eightQueens/main.py", "#e6653d")
         self.create_game_button(center_frame, "Traveling Salesman", "tsp_game/main.py", "#bd45b1")
-        self.create_game_button(center_frame, "Knight's Tour", "knight's tour/knights_tour.py", "#6098c6")
+        self.create_game_button(center_frame, "Knight's Tour", "knight's tour/mainMenu.py", "#6098c6")
 
         # Exit button
         exit_button = tk.Button(center_frame, text="Exit", width=20,height=1, font=("Fixedsys", 14, "bold"),

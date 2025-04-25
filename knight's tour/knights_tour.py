@@ -7,6 +7,7 @@
 
 import pygame
 import sys
+import ctypes
 import mysql.connector
 from tkinter import simpledialog
 import tkinter as tk
@@ -14,13 +15,13 @@ from db_utils import save_winner_to_db
 
 
 # Constants
-WIDTH, HEIGHT = 640, 700
+WIDTH, HEIGHT = 640, 690
 ROWS, COLS = 8, 8
 SQUARE_SIZE = WIDTH // COLS
 
 # Colors
 WHITE = (245, 245, 245)
-GRAY = (100, 100, 100)
+GRAY = (0, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
@@ -45,8 +46,10 @@ pygame.init()
 win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Knight's Tour")
 
+ctypes.windll.user32.MoveWindow(pygame.display.get_wm_info()['window'], 320, 3, WIDTH, HEIGHT, True)
+
 # Load knight image and scale it
-knight_img = pygame.image.load("knight.png")
+knight_img = pygame.image.load("knight's tour/knight.png")
 knight_img = pygame.transform.scale(knight_img, (SQUARE_SIZE - 10, SQUARE_SIZE - 10))
 
 button_font = pygame.font.SysFont(None, 24)
@@ -55,7 +58,13 @@ def draw_board(win, board, knight_pos=None):
     font = pygame.font.SysFont(None, 24)
     for row in range(ROWS):
         for col in range(COLS):
-            color = WHITE if (row + col) % 2 == 0 else GRAY
+             # Determine the color based on whether the cell has been visited
+            if board[row][col] != -1:  # If the cell has been visited
+                color = GREEN  # Mark visited cells in green
+            else:
+                color = WHITE if (row + col) % 2 == 0 else GRAY  # Default checkerboard pattern
+
+            # color = WHITE if (row + col) % 2 == 0 else GRAY
             rect = pygame.Rect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE)
             pygame.draw.rect(win, color, rect)
 
@@ -81,7 +90,7 @@ def draw_buttons(win):
     win.blit(solve_text, solve_text.get_rect(center=solve_rect.center))
 
     reset_rect = pygame.Rect(RESET_BUTTON_X, BUTTON_Y, BUTTON_WIDTH, BUTTON_HEIGHT)
-    reset_color = BUTTON_HOVER_COLOR if reset_rect.collidepoint(mouse_pos) else BUTTON_COLOR
+    reset_color = (255, 0, 0) if reset_rect.collidepoint(mouse_pos) else (200, 0, 0)
     pygame.draw.rect(win, reset_color, reset_rect, border_radius=8)
     reset_text = button_font.render("Reset", True, BUTTON_TEXT_COLOR)
     win.blit(reset_text, reset_text.get_rect(center=reset_rect.center))
