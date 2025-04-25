@@ -34,7 +34,6 @@ This project is an interactive and educational game built around the **Traveling
         - Brute Force
         - Greedy
         - Dynamic Programming
-      - 📝 Leaderboard system to save player scores
       - 💾 Stores game results in a **MySQL database**
       - 🌟 Allows manual play + algorithmic verification
 
@@ -72,18 +71,30 @@ Ensure MySQL is installed and create a database with the following tables:
 ```sql
       CREATE DATABASE tsp_game;
 
-      CREATE TABLE results (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          player_name VARCHAR(100),
-          home_city VARCHAR(10),
-          selected_cities TEXT,
-          shortest_route TEXT,
-          algorithm VARCHAR(50),
-          time_taken FLOAT,
-          game_round INT,
-          score INT
-      );
+        CREATE TABLE tsp_results (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        player_name VARCHAR(100) NOT NULL,
+        home_city VARCHAR(100) NOT NULL,
+        selected_cities TEXT NOT NULL,        
+        shortest_route TEXT NOT NULL,         
+        route_cost FLOAT NOT NULL,
+        brute_force_time FLOAT,              
+        greedy_time FLOAT,
+        dp_time FLOAT,
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
 
+
+
+        CREATE TABLE IF NOT EXISTS tsp_algorithm_times (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        player_name VARCHAR(100) NOT NULL,
+        round_number INT NOT NULL,
+        brute_force_time FLOAT,
+        greedy_time FLOAT,
+        dp_time FLOAT,
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
 
 Update your db/connect.py with your database credentials:
 
@@ -111,7 +122,7 @@ Update your db/connect.py with your database credentials:
 🧪 Testing
         To run unit tests on algorithms:
         
-                python tests/test_algorithms.py
+                pytest --rich --tb=short -v
 
 
 📦 Requirements

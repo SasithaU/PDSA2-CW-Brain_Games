@@ -6,7 +6,6 @@ from algorithms import (
     check_winner,
     is_draw
 )
-
 #Test for available moves
 def test_get_available_moves():
     board = [

@@ -33,10 +33,7 @@ class BrainGamesMenu:
         center_frame.place(relx=0.5, rely=0.6, anchor=tk.CENTER)
         center_frame.pack_propagate(False)
 
-        # Title
-        # title_label = tk.Label(center_frame, text=" Brain Games", font=("Old English Text MT", 24), bg="#f7f7eb")
-        # title_label.pack(pady=(10, 30))
-
+ 
         # Buttons for games
         self.create_game_button(center_frame, "Tic Tac Toe", "tic_tac_toe_game/main.py", "#39bda9")
         self.create_game_button(center_frame, "Tower of Hanoi", "TowerOfHanoi/main.py", "#b3d138")

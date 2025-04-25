@@ -37,10 +37,9 @@ class TSPGameUI:
         tk.Label(self.frame, text=f"Welcome, {self.app.player}!", font=("Helvetica", 20),bg=self.frame["bg"]).pack(pady=20)
         tk.Button(self.frame, text="🎮 Start Game", font=("Helvetica", 14), width=20,
                   command=self.app.on_start_game).pack(pady=10)
-        tk.Button(self.frame, text="📊 Leaderboard", font=("Helvetica", 14), width=20,
-                  command=self.app.show_leaderboard).pack(pady=10)
-        tk.Button(self.frame, text="❌ Quit Game", font=("Helvetica", 14), width=20,
-                  command=self.root.quit).pack(pady=10)
+        tk.Button(self.frame, text="❌ Exit Game", font=("Helvetica", 14), width=20,
+              command=self.app.exit_game).pack(pady=10)
+      
 
     def show_city_selection(self, home, city_list):
         self.clear()
@@ -140,53 +139,36 @@ class TSPGameUI:
         tk.Button(self.frame, text="✅ Submit Route", command=submit_route,font=("Helvetica", 13, "bold"),activebackground="#C3B3E4",padx=50,pady=5,
             bg="#6A5ACD",fg="white",).pack(pady=10)
 
-    def show_algorithm_choice(self):
+    def show_result_screen(self, user_route, user_cost, correct,
+                           bf, greedy, dp, play_again_callback, quit_callback):
         self.clear()
-        tk.Label(self.frame, text="🧠 Choose Algorithm", font=("Helvetica", 16),bg=self.frame["bg"]).pack(pady=20)
-        for val, name in [("1", "Brute Force"), ("2", "Greedy"), ("3", "Dynamic Programming")]:
-            tk.Button(self.frame, text=name, font=("Helvetica", 14), width=25,
-                      command=lambda v=val: self.app.on_algorithm_chosen(v)).pack(pady=5)
+        title = "✅ Correct!" if correct else "❌ Incorrect"
+        tk.Label(self.frame, text=title, font=("Helvetica", 20, "bold"), bg=self.frame["bg"]).pack(pady=10)
 
-    def show_result_screen(self, correct_route, correct_distance, time_taken, user_route, is_correct):
-        self.clear()
-        result_text = (
-            f"✅ Correct Route: {' → '.join(correct_route)}\n"
-            f"🧭 Distance: {correct_distance} km\n"
-            f"⏱️ Time: {time_taken:.2f} milliseconds\n"
-            f"📌 Your Route: {' → '.join(user_route)}\n"
-            f"{'🎉 Correct! You found the shortest path!' if is_correct else '❌ Not the shortest path.'}"
-        )
-        tk.Label(self.frame, text=result_text, font=("Helvetica", 12),bg="#FFEF73", justify="left").pack(pady=20)
-        tk.Button(self.frame, text="🔁 Play Again", font=("Helvetica", 13, "bold"),activebackground="#C3B3E4",padx=50,pady=5,
-            bg="#6A5ACD",fg="white", command=self.app.play_again).pack(pady=5)
-        tk.Button(self.frame, text="❌ Quit", font=("Helvetica", 13, "bold"),activebackground="#C3B3E4",padx=50,pady=5,
-            bg="#FF0303",fg="white", command=self.app.end_game).pack(pady=5)
+        # Player's route
+        tk.Label(self.frame, text=f"🧍 Your Route: {' -> '.join(user_route)}", font=("Arial", 12), bg=self.frame["bg"]).pack(pady=5)
+        tk.Label(self.frame, text=f"🛣️ Your Distance: {user_cost} km", font=("Arial", 12), bg=self.frame["bg"]).pack(pady=5)
 
-    def show_final_score(self, player, score, rounds):
-        self.clear()
-        summary = f"🏁 Game Over {player}!\n⭐ Rounds Played: {rounds}\n🏆 Total Score: {score}"
-        tk.Label(self.frame, text=summary, font=("Helvetica", 14),bg="#FFEF73").pack(pady=30)
-        tk.Button(self.frame, text="📊 View Leaderboard", font=("Helvetica", 13, "bold"),activebackground="#C3B3E4",padx=50,pady=5,
-            bg="#6A5ACD",fg="white",command=self.app.show_leaderboard).pack(pady=10)
-        tk.Button(self.frame, text="❌ Exit", font=("Helvetica", 13, "bold"),activebackground="#C3B3E4",padx=50,pady=5,bg="#FF0303",fg="white", command=self.root.quit).pack(pady=5)
+        # Algorithm results
+        def algo_result(label, data):
+            route, cost, time = data
+            tk.Label(self.frame, text=f"🔍 {label}:", font=("Arial", 13, "bold"), bg=self.frame["bg"]).pack(pady=5)
+            tk.Label(self.frame, text=f"Route: {' -> '.join(route)}", font=("Arial", 11), bg=self.frame["bg"]).pack()
+            tk.Label(self.frame, text=f"Distance: {cost} km | Time: {time} ms", font=("Arial", 11), bg=self.frame["bg"]).pack()
 
-    def show_leaderboard(self, data):
-        self.clear()
-        tk.Label(self.frame, text="🏆 Leaderboard", font=("Helvetica", 16),bg=self.frame["bg"]).pack(pady=10)
-
-        cols = ("Rank", "Player", "Algorithm", "Score", "Round", "Time Taken")
-        tree = ttk.Treeview(self.frame, columns=cols, show="headings", height=10)
-
-        for col in cols:
-            tree.heading(col, text=col)
-            tree.column(col, width=100, anchor="center")
-
-        for i, row in enumerate(data, 1):
-            player, algo, score, round_num, time = row
-            tree.insert("", "end", values=(i, player, algo, score, round_num, f"{time:.2f}"))
-
-        tree.pack(expand=True, fill="both", pady=10)
-        tk.Button(self.frame, text="🔙 Back to Menu", font=("Helvetica", 13, "bold"),activebackground="#C3B3E4",padx=50,pady=5,
-            bg="#6A5ACD",fg="white", command=self.show_main_menu).pack(pady=10)
+        algo_result("Brute Force", bf)
+        algo_result("Greedy", greedy)
+        algo_result("Dynamic Programming", dp)
 
 
+      
+        tk.Label(self.frame, text="🎮 Round Complete!", font=("Helvetica", 20), bg=self.frame["bg"]).pack(pady=30)
+        # Buttons
+        tk.Button(self.frame, text="🔁 Play Again", font=("Helvetica", 13), width=20,
+                  bg="#6A5ACD", fg="white", command=play_again_callback).pack(pady=10)
+
+        tk.Button(self.frame, text="❌ Quit", font=("Helvetica", 13), width=20,
+                  bg="#D9534F", fg="white", command=quit_callback).pack(pady=5)
+        
+
+   

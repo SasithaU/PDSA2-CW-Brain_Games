@@ -103,6 +103,7 @@ CREATE DATABASE eight_queens_game;
         `recorded_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (`id`)
         ) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+```
 
 Update your db/connection.py with your database credentials:
 

@@ -1,39 +1,41 @@
-from .connect import get_connection
 import mysql.connector
+import json
+from db.connect import get_connection
 
-def save_result(player, home, cities, route, algo, time, score, round_num):
+def save_result(player, home, selected_cities, route, cost, bf_time, greedy_time, dp_time):
+    conn = get_connection()
+    cursor = conn.cursor()
     try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        query = """
-        INSERT INTO results (player_name, home_city, selected_cities, shortest_route, algorithm, time_taken, score, game_round)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """
-        cursor.execute(query, (player, home, ",".join(cities), " -> ".join(route), algo, time, score, round_num))
+        cursor.execute("""
+            INSERT INTO tsp_results (player_name, home_city, selected_cities, shortest_route, route_cost,
+                                      brute_force_time, greedy_time, dp_time)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            player,
+            home,
+            json.dumps(selected_cities),
+            json.dumps(route),
+            cost,
+            bf_time,
+            greedy_time,
+            dp_time
+        ))
         conn.commit()
     except mysql.connector.Error as err:
-        print(f"❌ Database Error: {err}")
+        print(f"Error saving result: {err}")
     finally:
-        if cursor: cursor.close()
-        if conn: conn.close()
+        cursor.close()
+        conn.close()
 
 
-def get_leaderboard(limit=10):
-    try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        query = """
-        SELECT player_name, algorithm, score, game_round, time_taken
-        FROM results
-        ORDER BY score DESC, time_taken ASC
-        LIMIT %s
-        """
-        cursor.execute(query, (limit,))
-        rows = cursor.fetchall()
-        return rows
-    except mysql.connector.Error as err:
-        print(f"❌ Database Error: {err}")
-        return []
-    finally:
-        if cursor: cursor.close()
-        if conn: conn.close()
+def log_algorithm_times(player_name, round_number, brute_force_time, greedy_time, dp_time):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO tsp_algorithm_times (
+            player_name, round_number, brute_force_time, greedy_time, dp_time
+        ) VALUES (%s, %s, %s, %s, %s)
+    """, (player_name, round_number, brute_force_time, greedy_time, dp_time))
+    conn.commit()
+    cursor.close()
+    conn.close()

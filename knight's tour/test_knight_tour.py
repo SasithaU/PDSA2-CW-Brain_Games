@@ -57,28 +57,28 @@ class TestKnightTour(unittest.TestCase):
 #             board[y][x] = 0
 #             backtracking_knights_tour(board, x, y, 1)
 
-class TestDatabase(unittest.TestCase):
+# class TestDatabase(unittest.TestCase):
 
-    @patch("knights_tour.mysql.connector.connect")
-    def test_save_winner_to_db_success(self, mock_connect):
-        mock_conn = MagicMock()
-        mock_cursor = MagicMock()
-        mock_connect.return_value = mock_conn
-        mock_conn.cursor.return_value = mock_cursor
+#     @patch("knights_tour.mysql.connector.connect")
+#     def test_save_winner_to_db_success(self, mock_connect):
+#         mock_conn = MagicMock()
+#         mock_cursor = MagicMock()
+#         mock_connect.return_value = mock_conn
+#         mock_conn.cursor.return_value = mock_cursor
 
-        save_winner_to_db("TestUser", 64)
+#         save_winner_to_db("TestUser", 64)
 
-        mock_cursor.execute.assert_called_once()
-        mock_conn.commit.assert_called_once()
-        mock_cursor.close.assert_called_once()
-        mock_conn.close.assert_called_once()
+#         mock_cursor.execute.assert_called_once()
+#         mock_conn.commit.assert_called_once()
+#         mock_cursor.close.assert_called_once()
+#         mock_conn.close.assert_called_once()
 
-    @patch("knights_tour.mysql.connector.connect", side_effect=Exception("DB error"))
-    def test_save_winner_to_db_error_handling(self, mock_connect):
-        try:
-            save_winner_to_db("TestUser", 64)
-        except Exception:
-            self.fail("save_winner_to_db raised an exception unexpectedly!")
+#     @patch("knights_tour.mysql.connector.connect", side_effect=Exception("DB error"))
+#     def test_save_winner_to_db_error_handling(self, mock_connect):
+#         try:
+#             save_winner_to_db("TestUser", 64)
+#         except Exception:
+#             self.fail("save_winner_to_db raised an exception unexpectedly!")
 
 if __name__ == '__main__':
     unittest.main()

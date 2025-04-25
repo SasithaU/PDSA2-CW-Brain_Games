@@ -46,7 +46,7 @@ win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Knight's Tour")
 
 # Load knight image and scale it
-knight_img = pygame.image.load("knight's tour\knight.png")
+knight_img = pygame.image.load("knight.png")
 knight_img = pygame.transform.scale(knight_img, (SQUARE_SIZE - 10, SQUARE_SIZE - 10))
 
 button_font = pygame.font.SysFont(None, 24)
@@ -107,6 +107,34 @@ def display_message(win, message, color=RED):
     win.blit(text, text_rect)
     pygame.display.update()
     pygame.time.wait(2000)
+    
+    
+def get_algorithm_selection():
+    selected_algo = []
+
+    def submit():
+        choice = combo.get()
+        if choice:
+            selected_algo.append(choice)
+            top.destroy()
+
+    top = tk.Tk()
+    top.title("Select Algorithm")
+    top.geometry("300x120")
+    tk.Label(top, text="Choose an algorithm:").pack(pady=10)
+
+    from tkinter import ttk
+    combo = ttk.Combobox(top, values=["warnsdorff", "backtracking"], state="readonly")
+    combo.pack(pady=5)
+    combo.set("warnsdorff")  # default selection
+
+    submit_btn = tk.Button(top, text="Submit", command=submit)
+    submit_btn.pack(pady=10)
+
+    top.mainloop()
+
+    return selected_algo[0] if selected_algo else None
+
 
 
 
@@ -260,17 +288,56 @@ def main():
 
 
                 
+                # if SOLVE_BUTTON_X <= mx <= SOLVE_BUTTON_X + BUTTON_WIDTH and BUTTON_Y <= my <= BUTTON_Y + BUTTON_HEIGHT:
+                #     if knight_pos and not game_over:
+                #         # Show dropdown to choose algorithm
+                #         try:
+                #             root = tk.Tk()
+                #             root.withdraw()
+                #             algorithm = simpledialog.askstring("Select Algorithm", "Choose algorithm:\n- warnsdorff\n- backtracking")
+                #             root.destroy()
+                #         except Exception as e:
+                #             print(f"Error during algorithm selection: {e}")
+                #             algorithm = "warnsdorff"  # default fallback
+
+                #         if algorithm:
+                #             algorithm = algorithm.lower()
+                #             visited = [knight_pos]
+                #             board = [[-1 for _ in range(COLS)] for _ in range(ROWS)]
+                #             x, y = knight_pos
+                #             board[y][x] = 0
+
+                #             solved = False
+                #             if algorithm == "warnsdorff":
+                #                 solved = solve_knights_tour(win, board, x, y, 1)
+                #             elif algorithm == "backtracking":
+                #                 solved = backtracking_knights_tour(board, x, y, 1)
+
+                #             if not solved:
+                #                 display_message(win, "No solution found!", RED)
+                
+                
+                
                 if SOLVE_BUTTON_X <= mx <= SOLVE_BUTTON_X + BUTTON_WIDTH and BUTTON_Y <= my <= BUTTON_Y + BUTTON_HEIGHT:
-                    if knight_pos and not game_over:
+                    if not knight_pos:
+                        display_message(win, "Place the knight first!", RED)
+                        continue
+
+                    if not game_over:
                         # Show dropdown to choose algorithm
-                        try:
-                            root = tk.Tk()
-                            root.withdraw()
-                            algorithm = simpledialog.askstring("Select Algorithm", "Choose algorithm:\n- warnsdorff\n- backtracking")
-                            root.destroy()
-                        except Exception as e:
-                            print(f"Error during algorithm selection: {e}")
-                            algorithm = "warnsdorff"  # default fallback
+                        # try:
+                        #     root = tk.Tk()
+                        #     root.withdraw()
+                        #     algorithm = simpledialog.askstring("Select Algorithm", "Choose algorithm:\n- warnsdorff\n- backtracking")
+                        #     root.destroy()
+                        # except Exception as e:
+                        #     print(f"Error during algorithm selection: {e}")
+                        #     algorithm = "warnsdorff"  # default fallback
+                        
+                        
+                        algorithm = get_algorithm_selection()
+
+                        
 
                         if algorithm:
                             algorithm = algorithm.lower()
@@ -287,6 +354,7 @@ def main():
 
                             if not solved:
                                 display_message(win, "No solution found!", RED)
+
 
                 
 
@@ -313,6 +381,8 @@ def main():
                             if len(get_valid_moves(knight_pos, visited)) == 0 and len(visited) < ROWS * COLS:
                                 display_message(win, "No more valid moves. You lost!", RED)
                                 # save_winner_to_db(player_name, len(visited))
+                                # save_winner_to_db(player_name, len(visited), visited)  # <-- include the path here
+
                                 game_over = True
                         else:
                             display_message(win, "Invalid move!", RED)
@@ -326,7 +396,9 @@ def main():
                 root.destroy()
 
                 if player_name:
-                    save_winner_to_db(player_name, len(visited))
+                    # save_winner_to_db(player_name, len(visited))
+                    save_winner_to_db(player_name, len(visited), visited)  # <-- include the path here
+
                 # save_winner_to_db(player_name, len(visited))
 
             except Exception as e:
