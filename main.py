@@ -12,7 +12,7 @@ class BrainGamesMenu:
         window_height = 670
 
         try:
-            bg_image = Image.open("assets\mainUI.png")  
+            bg_image = Image.open("assets/mainUI.png")  
             bg_image = bg_image.resize((window_width, window_height), Image.Resampling.LANCZOS)
             self.bg_photo = ImageTk.PhotoImage(bg_image)
             bg_label = tk.Label(self.root, image=self.bg_photo)

@@ -168,7 +168,7 @@ def solve_knights_tour(win, board, x, y, move_num):
         for (nx, ny), _ in moves:
             board[ny][nx] = move_num
             draw_board(win, board, (nx, ny))
-            pygame.time.delay(300)
+            pygame.time.delay(600)
 
             if solve_knights_tour(win, board, nx, ny, move_num + 1):
                 return True

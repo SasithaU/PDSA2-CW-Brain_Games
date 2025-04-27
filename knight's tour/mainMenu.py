@@ -1,6 +1,7 @@
 import pygame
 import sys
 import ctypes
+from knights_tour import main  # Import the main function from knights_tour.py
 
 # Initialize Pygame
 pygame.init()
@@ -13,7 +14,7 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 
 # Load background image
-background_image = pygame.image.load("knight's tour\knightbg.jpeg")
+background_image = pygame.image.load("knight's tour/knightbg.jpeg")
 background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))  # Scale to window size
 
 # Create the screen
@@ -51,6 +52,8 @@ class Button:
 # Button actions
 def start_game():
     print("Starting the game...")  # Replace with actual game start logic
+    main()  # Call the main function from knights_tour.py
+
 
 def exit_game():
     pygame.quit()
